@@ -43,9 +43,15 @@ async function run() {
     const doctorsCollection = client.db("doctorsPortal").collection("doctors");
 
     // make sure you use verifyAdmin after veriJWT
-    const verifyAdmin = (req, res, next) => {
-      console.log("inside verifyAdmin", req.decoded.email);
-      next()
+    const verifyAdmin = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const query = { email: decodedEmail };
+      const user = await userCollection.findOne(query);
+
+      if (user?.role !== "admin") {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      next();
     };
 
     app.get("/appointmentOptions", async (req, res) => {
@@ -162,7 +168,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/doctors", verifyJWT,verifyAdmin, async (req, res) => {
+    app.get("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
       const result = await doctorsCollection.find(query).toArray();
       res.send(result);
@@ -173,7 +179,7 @@ async function run() {
       const result = await doctorsCollection.insertOne(doctor);
       res.send(result);
     });
-    app.delete("/doctors/:id", verifyJWT, async (req, res) => {
+    app.delete("/doctors/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await doctorsCollection.deleteOne(filter);
