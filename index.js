@@ -40,6 +40,13 @@ async function run() {
       .collection("appointmentOptions");
     const bookingCollection = client.db("doctorsPortal").collection("bookings");
     const userCollection = client.db("doctorsPortal").collection("users");
+    const doctorsCollection = client.db("doctorsPortal").collection("doctors");
+
+    // make sure you use verifyAdmin after veriJWT
+    const verifyAdmin = (req, res, next) => {
+      console.log("inside verifyAdmin", req.decoded.email);
+      next()
+    };
 
     app.get("/appointmentOptions", async (req, res) => {
       const date = req.query.date;
@@ -152,6 +159,24 @@ async function run() {
         },
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+    });
+
+    app.get("/doctors", verifyJWT,verifyAdmin, async (req, res) => {
+      const query = {};
+      const result = await doctorsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.post("/doctors", verifyJWT, async (req, res) => {
+      const doctor = req.body;
+      const result = await doctorsCollection.insertOne(doctor);
+      res.send(result);
+    });
+    app.delete("/doctors/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await doctorsCollection.deleteOne(filter);
       res.send(result);
     });
   } finally {
