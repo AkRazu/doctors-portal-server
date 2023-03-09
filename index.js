@@ -168,6 +168,24 @@ async function run() {
       res.send(result);
     });
 
+    // temporary to update price field on appointment options
+    /* app.get("/addPrice", async (req, res) => {
+      const filter = {};
+      const option = { upsert: true };
+      const updateDoc = {
+        $set: {
+          price: 99,
+        },
+      };
+      const result = await appointmentOptionCollection.updateMany(
+        filter,
+        updateDoc,
+        option
+      );
+      res.send(result);
+    }); */
+    
+
     app.get("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
       const query = {};
       const result = await doctorsCollection.find(query).toArray();
