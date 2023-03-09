@@ -7,7 +7,9 @@ require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
+const stripe = require("stripe")(process.env.STRIPE_SECRETE_KEY);
 
+console.log(stripe);
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.hb0lx3c.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {

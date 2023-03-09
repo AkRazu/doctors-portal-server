@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@types/node@*":
+"@types/node@*", "@types/node@>=8.1.0":
   version "18.14.1"
   resolved "https://registry.npmjs.org/@types/node/-/node-18.14.1.tgz"
   integrity sha512-QH+37Qds3E0eDlReeboBxfHbX9omAcBCXEzswCu6jySP642jiM3cYSIkU/REqwhCUqXdonHFuBfJDiAJxMNhaQ==
@@ -432,7 +432,7 @@ punycode@^2.1.1:
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.0.tgz"
   integrity sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==
 
-qs@6.11.0:
+qs@^6.11.0, qs@6.11.0:
   version "6.11.0"
   resolved "https://registry.npmjs.org/qs/-/qs-6.11.0.tgz"
   integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
@@ -545,6 +545,14 @@ statuses@2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/statuses/-/statuses-2.0.1.tgz"
   integrity sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==
+
+stripe@^11.13.0:
+  version "11.13.0"
+  resolved "https://registry.npmjs.org/stripe/-/stripe-11.13.0.tgz"
+  integrity sha512-Jx0nDbdvRsTtDSX5OFQ+4rLmYIftoiOE9HAXWIgyhAz1QjRFI3UIiJ/kCyhkdJBoHu019O5Ya6EmQ5Zf635XDw==
+  dependencies:
+    "@types/node" ">=8.1.0"
+    qs "^6.11.0"
 
 toidentifier@1.0.1:
   version "1.0.1"
