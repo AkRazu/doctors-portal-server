@@ -1,16 +1,18 @@
 const express = require("express");
 const cors = require("cors");
-const app = express();
-const port = process.env.PORT || 5000;
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
+const port = process.env.PORT || 5000;
+
+const app = express();
+
+// middleware
 app.use(cors());
 app.use(express.json());
-const stripe = require("stripe")(process.env.STRIPE_SECRETE_KEY);
 
-console.log(stripe);
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.hb0lx3c.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -21,7 +23,7 @@ const client = new MongoClient(uri, {
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).send("unauthorize access");
+    return res.status(401).send("unauthorized access");
   }
 
   const token = authHeader.split(" ")[1];
@@ -45,6 +47,7 @@ async function run() {
       .collection("bookings");
     const userCollection = client.db("doctorsPortal").collection("users");
     const doctorsCollection = client.db("doctorsPortal").collection("doctors");
+    const paymentCollection = client.db("doctorsPortal").collection("payments");
 
     // make sure you use verifyAdmin after veriJWT
     const verifyAdmin = async (req, res, next) => {
@@ -157,7 +160,14 @@ async function run() {
         .toArray();
       res.send(options);
     });
-
+    app.get("/appointmentSpecialty", async (req, res) => {
+      const query = {};
+      const result = await appointmentOptionCollection
+        .find(query)
+        .project({ name: 1 })
+        .toArray();
+      res.send(result);
+    });
     /***
      * API Naming Convention
      * app.get('/bookings')
@@ -206,6 +216,41 @@ async function run() {
       const result = await bookingsCollection.insertOne(booking);
       res.send(result);
     });
+
+    // STRIPE
+    app.post("/create-payment-intent", async (req, res) => {
+      const booking = req.body;
+      const price = booking.price;
+      const amount = price * 100;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: amount,
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
+
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      const result = await paymentCollection.insertOne(payment);
+      const id = payment.bookingId;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const updatedResult = await bookingsCollection.updateOne(
+        filter,
+        updatedDoc
+      );
+      res.send(result);
+    });
+
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
